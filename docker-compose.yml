@@ -7,6 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - WORKERS=1 # number of workers, start with 1 in first time due to the duplicate database initialization issue
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/task_db
       - REDIS_HOST=redis
     depends_on:
@@ -14,6 +15,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   db:
     image: postgres:15
