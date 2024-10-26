@@ -4,6 +4,9 @@ from sqlalchemy.future import select
 from app.db.models import Task
 from app.db.database import async_session
 from app.queue.redis_queue import dequeue_task
+from app.utils.logging import setup_logger
+
+logger = setup_logger(__name__)
 
 async def process_task(task_id: str, db: AsyncSession):
     # fetch task
@@ -12,32 +15,33 @@ async def process_task(task_id: str, db: AsyncSession):
 
     # check task status
     if not task:
-        print(f"Task {task_id} not found.")
+        logger.warning(f"Task {task_id} not found.")
         return
     if task.status != "pending":
-        print(f"Task {task_id} already processed or canceled.")
+        logger.warning(f"Task {task_id} already processed or canceled.")
         return
     
     # process task
-    task.status = "processing"
-    await db.commit()
-    await asyncio.sleep(3)
-    task.status = "completed"
-    await db.commit()
-    print(f"Task {task_id} completed.")
+    try:
+        task.status = "processing"
+        await db.commit()
+        await asyncio.sleep(3)
+        task.status = "completed"
+        await db.commit()
+        logger.info(f"Task {task_id} completed.")
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Task {task_id} processing error: {e}")
 
 async def start_consumer():
     while True:
         try:
             task_id = await dequeue_task()
         except Exception as e:
-            print(f"get task error: {e}")
+            logger.error(f"get task error: {e}")
         else:
             if task_id:
-                try:
-                    async with async_session() as db:
-                        await process_task(task_id, db)
-                except Exception as e:
-                    print(f"process task error: {e}")
+                async with async_session() as db:
+                    await process_task(task_id, db)
             else:
                 await asyncio.sleep(1)
