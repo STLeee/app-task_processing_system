@@ -3,10 +3,8 @@ import os
 from logging.handlers import RotatingFileHandler
 from app.core.config import settings
 
-LOG_FILE_PATH = os.path.join("logs", "app.log")
-
 # create logs directory if not exists
-os.makedirs(os.path.dirname(LOG_FILE_PATH), exist_ok=True)
+os.makedirs(os.path.dirname(settings.log_file_path), exist_ok=True)
 
 def setup_logger(name: str, level: int = settings.log_level.upper()) -> logging.Logger:
     logger = logging.getLogger(name)
@@ -18,7 +16,7 @@ def setup_logger(name: str, level: int = settings.log_level.upper()) -> logging.
 
     # set log format
     formatter = logging.Formatter(
-        "[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"
+        "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
     )
 
     # console handler
@@ -29,7 +27,7 @@ def setup_logger(name: str, level: int = settings.log_level.upper()) -> logging.
 
     # file handler (rotate every 5MB)
     file_handler = RotatingFileHandler(
-        LOG_FILE_PATH, maxBytes=5 * 1024 * 1024, backupCount=5
+        settings.log_file_path, maxBytes=5 * 1024 * 1024, backupCount=5
     )
     file_handler.setLevel(level)
     file_handler.setFormatter(formatter)

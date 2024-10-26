@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     # app
     app_env: str = Field("dev", env="APP_ENV")
     log_level: str = Field("debug", env="LOG_LEVEL")
+    log_file_path: str = Field(os.path.join("logs", "app.log"), env="LOG_PATH")
 
     # database
     database_url: str = Field(..., env="DATABASE_URL")
