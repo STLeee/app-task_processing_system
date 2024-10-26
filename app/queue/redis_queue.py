@@ -1,13 +1,11 @@
-import os
 from redis.asyncio import Redis
-
+from app.core.config import settings
 from app.utils.logging import setup_logger
 
 logger = setup_logger(__name__)
 
 # init redis
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-redis = Redis(host=REDIS_HOST, decode_responses=True)
+redis = Redis(host=settings.redis_host, decode_responses=True)
 
 QUEUE_NAME = "task_queue"
 
