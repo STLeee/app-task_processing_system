@@ -5,10 +5,13 @@ WORKDIR /tps
 # install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
+RUN apt-get update
+RUN apt-get install -y supervisor
 
 # copy project
 COPY ./app ./app
 COPY ./script ./script
+COPY ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # expose port
 EXPOSE 8000
@@ -17,4 +20,4 @@ EXPOSE 8000
 ENV WORKERS=1
 
 # start server
-CMD ["bash", "-x", "./script/start.sh"]
+CMD ["supervisord", "-n"]
