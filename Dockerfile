@@ -10,7 +10,6 @@ RUN apt-get install -y supervisor
 
 # copy project
 COPY ./app ./app
-COPY ./script ./script
 COPY ./config ./config
 RUN mv ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
