@@ -1,8 +1,7 @@
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from app.db.models import Task
-from app.db.database import async_session
+from app.db.models import async_session
 from app.queue.redis_queue import dequeue_task
 from app.utils.logging import setup_logger
 
@@ -10,8 +9,7 @@ logger = setup_logger(__name__)
 
 async def process_task(task_id: str, db: AsyncSession):
     # fetch task
-    result = await db.execute(select(Task).filter(Task.id == task_id))
-    task = result.scalars().first()
+    task = await Task.get(task_id, db)
 
     # check task status
     if not task:
@@ -25,7 +23,9 @@ async def process_task(task_id: str, db: AsyncSession):
     try:
         task.status = "processing"
         await db.commit()
-        await asyncio.sleep(3)
+
+        await asyncio.sleep(10)
+
         task.status = "completed"
         await db.commit()
         logger.info(f"Task {task_id} completed.")

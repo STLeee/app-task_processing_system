@@ -1,39 +1,33 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from app.db.models import Task
-from app.db.database import async_session
+from app.db.models import async_session
 from app.schemas import TASK_STATUS_CANCELED, TASK_STATUS_PENDING, TASK_STATUS_PROCESSING, TaskCreate, TaskResponse
 from app.queue.redis_queue import enqueue_task
 from app.utils.logging import setup_logger
-import uuid
 
 logger = setup_logger(__name__)
 
 router = APIRouter()
 
 async def get_db():
-    async with async_session() as session:
-        yield session
+    async with async_session() as db:
+        yield db
 
 @router.post("/task", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 async def create_task(task: TaskCreate, db: AsyncSession = Depends(get_db)):
-    task_id = str(uuid.uuid4())
-    new_task = Task(id=task_id, content=task.content, status="pending")
-    db.add(new_task)
-    await db.commit()
-    await db.refresh(new_task)
+    new_task = await Task.create(task.content, db)
 
     # add task to the queue
-    await enqueue_task(task_id)
+    await enqueue_task(new_task.id)
 
-    logger.info(f"Task created with ID: {task_id}")
+    logger.info(f"Task created with ID: {new_task.id}")
     return new_task
 
 @router.get("/task/{task_id}", response_model=TaskResponse)
 async def get_task(task_id: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Task).filter(Task.id == task_id))
-    task = result.scalars().first()
+    # find task by id
+    task = await Task.get(task_id, db)
 
     if not task:
         logger.error(f"Task {task_id} not found.")
@@ -44,8 +38,7 @@ async def get_task(task_id: str, db: AsyncSession = Depends(get_db)):
 @router.patch("/task/{task_id}/cancel", response_model=TaskResponse)
 async def cancel_task(task_id: str, db: AsyncSession = Depends(get_db)):
     # find task by id
-    result = await db.execute(select(Task).filter(Task.id == task_id))
-    task = result.scalars().first()
+    task = await Task.get(task_id, db)
 
     # check if task exists and is cancelable
     if not task:

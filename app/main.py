@@ -9,6 +9,9 @@ from app.utils.logging import setup_logger
 
 logger = setup_logger(__name__)
 
+# set sqlalchemy logger
+setup_logger("sqlalchemy")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Starting app in {settings.app_env} environment.")
