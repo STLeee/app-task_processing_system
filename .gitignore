@@ -1,1 +1,5 @@
-data/postgres
+.vscode/
+__pycache__/
+
+data/postgres/
+logs/
