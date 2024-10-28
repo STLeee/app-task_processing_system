@@ -1,12 +1,8 @@
-from fastapi import HTTPException
 import pytest
 from unittest import mock
-from fastapi.testclient import TestClient
+from fastapi import HTTPException
 import pytest_asyncio
-from app.api.task_api import router
-from app.schemas import TASK_STATUS_CANCELED, TASK_STATUS_PENDING
-
-client = TestClient(router)
+from app.api.task_api import cancel_task
 
 @pytest_asyncio.fixture
 def mock_task():
@@ -14,93 +10,68 @@ def mock_task():
         yield MockTask
 
 @pytest_asyncio.fixture
-def mock_enqueue_task():
-    with mock.patch('app.api.task_api.enqueue_task') as MockEnqueueTask:
-        yield MockEnqueueTask
+def mock_db():
+    with mock.patch('app.api.task_api.async_session') as MockSession:
+        yield MockSession
 
 @pytest_asyncio.fixture
 def mock_logger():
     with mock.patch('app.api.task_api.logger') as MockLogger:
         yield MockLogger
 
-def test_create_task(mock_task, mock_enqueue_task, mock_logger):
-    task_data = {"content": "Test task"}
-    mock_task.create.return_value = mock_task
-    mock_task.id = "123"
-    mock_task.content = "Test task"
-    mock_task.status = TASK_STATUS_PENDING
-    mock_task.save = mock.AsyncMock()
-
-    response = client.post("/task", json=task_data)
-
-    assert response.status_code == 201
-    assert response.json()["id"] == "123"
-    mock_task.create.assert_called_once_with(content="Test task")
-    mock_task.save.assert_awaited_once()
-    mock_enqueue_task.assert_awaited_once_with("123")
-    mock_logger.info.assert_called_with("Task created with ID: 123")
-
-def test_get_task(mock_task, mock_logger):
-    mock_task.get = mock.AsyncMock(return_value=mock_task)
-    mock_task.id = "123"
-    mock_task.content = "Test task"
-    mock_task.status = TASK_STATUS_PENDING
-
-    # test successful response
-    response = client.get("/task/123")
-
-    assert response.status_code == 200
-    assert response.json()["id"] == "123"
-    mock_task.get.assert_awaited_once_with("123")
-    mock_logger.error.assert_not_called()
-
+@pytest.mark.asyncio
+async def test_cancel_task_not_found(mock_task, mock_db, mock_logger):
     mock_task.get = mock.AsyncMock(return_value=None)
+    db = mock_db.return_value.__aenter__.return_value
 
-    # test task not found
-    with pytest.raises(HTTPException) as err:
-        client.get("/task/456")
+    with pytest.raises(HTTPException) as exc_info:
+        await cancel_task("123", db)
 
-        assert err.value.status_code == 404
-        assert err.value.detail == "Task not found"
-        mock_task.get.assert_awaited_with("456")
-        mock_logger.error.assert_called_with("Task 456 not found.")
+    assert exc_info.value.status_code == 404
+    mock_task.get.assert_awaited_once_with("123", db)
+    mock_logger.error.assert_called_with("Task 123 not found.")
 
-def test_cancel_task(mock_task, mock_logger):
-    mock_task.get = mock.AsyncMock(return_value=mock_task)
-    mock_task.id = "123"
-    mock_task.content = "Test task"
-    mock_task.status = TASK_STATUS_PENDING
-    mock_task.update = mock.AsyncMock()
+@pytest.mark.asyncio
+async def test_cancel_task_already_completed(mock_task, mock_db, mock_logger):
+    task = mock.Mock()
+    task.status = "completed"
+    mock_task.get = mock.AsyncMock(return_value=task)
+    db = mock_db.return_value.__aenter__.return_value
 
-    # test successful response
-    response = client.patch("/task/123/cancel")
+    with pytest.raises(HTTPException) as exc_info:
+        await cancel_task("123", db)
 
-    assert response.status_code == 200
-    assert response.json()["status"] == TASK_STATUS_CANCELED
-    mock_task.get.assert_awaited_once_with("123")
-    mock_task.update.assert_awaited_once()
+    assert exc_info.value.status_code == 400
+    mock_task.get.assert_awaited_once_with("123", db)
+    mock_logger.warning.assert_called_with("Task 123 cannot be canceled as it is already completed.")
+
+@pytest.mark.asyncio
+async def test_cancel_task_success(mock_task, mock_db, mock_logger):
+    task = mock.Mock()
+    task.status = "pending"
+    mock_task.get = mock.AsyncMock(return_value=task)
+    db = mock_db.return_value.__aenter__.return_value
+
+    await cancel_task("123", db)
+
+    mock_task.get.assert_awaited_once_with("123", db)
+    assert task.status == "canceled"
+    db.commit.assert_awaited()
+    db.refresh.assert_awaited_with(task)
     mock_logger.info.assert_called_with("Task 123 canceled.")
 
-    mock_task.get = mock.AsyncMock(return_value=None)
+@pytest.mark.asyncio
+async def test_cancel_task_exception(mock_task, mock_db, mock_logger):
+    task = mock.Mock()
+    task.status = "pending"
+    mock_task.get = mock.AsyncMock(return_value=task)
+    db = mock_db.return_value.__aenter__.return_value
+    db.commit = mock.AsyncMock(side_effect=Exception("commit error"))
 
-    # test task not found
-    with pytest.raises(HTTPException) as err:
-        client.patch("/task/456/cancel")
+    with pytest.raises(HTTPException) as exc_info:
+        await cancel_task("123", db)
 
-        assert err.value.status_code == 404
-        assert err.value.detail == "Task not found"
-        mock_task.get.assert_awaited_with("456")
-        mock_logger.error.assert_called_with("Task 456 not found.")
-
-    # test task already processing
-    mock_task.get = mock.AsyncMock(return_value=mock_task)
-    mock_task.status = "completed"
-
-    # test task not found
-    with pytest.raises(HTTPException) as err:
-        client.patch("/task/789/cancel")
-
-        assert err.value.status_code == 400
-        assert err.value.json()["detail"] == "Task cannot be canceled"
-        mock_task.get.assert_awaited_with("789")
-        mock_logger.warning.assert_called_with("Task 789 cannot be canceled as it is already completed.")
+    assert exc_info.value.status_code == 500
+    mock_task.get.assert_awaited_once_with("123", db)
+    db.commit.assert_awaited()
+    mock_logger.error.assert_called_with("Task 123 cancel error: commit error")

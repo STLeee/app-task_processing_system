@@ -24,7 +24,7 @@ async def process_task(task_id: str, db: AsyncSession):
         task.status = "processing"
         await db.commit()
 
-        await asyncio.sleep(10)
+        await asyncio.sleep(3)
 
         task.status = "completed"
         await db.commit()

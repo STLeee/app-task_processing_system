@@ -49,9 +49,14 @@ async def cancel_task(task_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Task cannot be canceled")
 
     # cancel task
-    task.status = TASK_STATUS_CANCELED
-    await db.commit()
-    await db.refresh(task)
+    try:
+        task.status = TASK_STATUS_CANCELED
+        await db.commit()
+        await db.refresh(task)
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Task {task_id} cancel error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Task cancel error")
 
     logger.info(f"Task {task_id} canceled.")
     return task
