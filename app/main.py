@@ -1,6 +1,7 @@
-import asyncio
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
+from prometheus_client import generate_latest, REGISTRY
+from prometheus_client.exposition import CONTENT_TYPE_LATEST
 from app.api import task_api
 from app.consumer.task_consumer import start_consumer
 from app.core.config import settings
@@ -34,3 +35,11 @@ app.include_router(task_api.router)
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+# metrics
+@app.get("/metrics")
+async def metrics():
+    return Response(
+        content=generate_latest(REGISTRY),
+        media_type=CONTENT_TYPE_LATEST
+    )

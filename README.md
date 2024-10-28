@@ -6,13 +6,20 @@
     - [Common Environment Variables](#common-environment-variables)
   - [How to Run the Application Using Docker or Docker Compose](#how-to-run-the-application-using-docker-or-docker-compose)
   - [How to Execute Tests](#how-to-execute-tests)
-  - [Assumptions or Additional Design Decisions](#assumptions-or-additional-design-decisions)
   - [API Description](#api-description)
     - [Create Task API](#create-task-api)
     - [Get Task API](#get-task-api)
     - [Cancel Task API](#cancel-task-api)
     - [Health Check API](#health-check-api)
   - [Consumer for Processing Messages](#consumer-for-processing-messages)
+  - [Metrics System](#metrics-system)
+    - [API](#api)
+    - [Prometheus](#prometheus)
+      - [How to Access Prometheus](#how-to-access-prometheus)
+    - [Example Metrics](#example-metrics)
+    - [Grafana](#grafana)
+    - [How to Access Grafana](#how-to-access-grafana)
+  - [Assumptions or Additional Design Decisions](#assumptions-or-additional-design-decisions)
 
 ## Project Architecture
 
@@ -26,6 +33,8 @@ The Task Processing System is structured as follows:
   - **queue/**: Queue-related code.
   - **utils/**: Utility functions.
 - **config/**: Configuration files for the application.
+  - **grafana/**: Grafana configuration files.
+  - **prometheus.yml**: Configuration for Prometheus.
   - **supervisord.conf**: Configuration for Supervisor.
   - **uvicorn.log.conf.yml**: Logging configuration for Uvicorn.
 - **tests/**: Test cases for the application.
@@ -99,16 +108,6 @@ make test
 ```
 
 This command will use Docker Compose to spin up the necessary services and execute the tests defined in the tests/ directory.
-
-## Assumptions or Additional Design Decisions
-
-- **Database**: PostgreSQL is used as the database, and its data is stored in the data/postgres directory.
-- **Queue**: Redis is used as the queue system.
-- **Environment Variables**: The application uses environment variables defined in .env.dev and .env.test for configuration.
-- **Logging**: Logging is configured using config/uvicorn.log.conf.yml to output logs to stdout and stderr.
-- **Supervisor**: Supervisor is used to manage the Uvicorn process, as configured in config/supervisord.conf.
-- **Health Checks**: Health checks are configured for the app, db, and redis services in docker-compose.yml.
-- **Scalable**: The architecture allows adjustable worker counts for parallel processing, with the flexibility to deploy the server and consumer services separately in the future.
 
 ## API Description
 
@@ -203,3 +202,63 @@ The consumer component reads messages from the queue and processes them asynchro
 1. Updates the task's `status` to `processing`.
 2. Sleeps for 3 seconds to simulate task processing.
 3. After 3 seconds, updates the corresponding task in the database to set its status to `completed`.
+
+## Metrics System
+
+The Task Processing System includes a metrics system using Prometheus and Grafana for monitoring and visualization.
+
+### API
+
+- Metrics Endpoint: `/metrics`
+  - Method: `GET`
+  - Description: Exposes application metrics for Prometheus to scrape.
+  - Response: Prometheus metrics in plain text format.
+
+### Prometheus
+
+Prometheus is configured to scrape metrics from the application.
+
+- Configuration File: [config/prometheus.yml](config/prometheus.yml)
+- Scrape Interval: 15 seconds
+- Scrape Target: `app:8000`
+
+#### How to Access Prometheus
+
+- Open your browser and go to `http://localhost:9090`
+
+### Example Metrics
+
+- Task Status Gauge: `task_status`
+- Task Get Request Counter: `task_get_request_count`
+- Task Create Request Counter: `task_create_request_count`
+- Task Create Success Counter: `task_create_success_count`
+- Task Create Fail Counter: `task_create_fail_count`
+- Task Get Request Counter: `task_get_request_count`
+- Task Cancel Request Counter: `task_cancel_request_count`
+- Task Cancel Success Counter: `task_cancel_success_count`
+- Task Cancel Fail Counter: `task_cancel_fail_count`
+- Task Processing Duration Histogram: `task_processing_duration`
+- Task Processing Success Counter: `task_processing_success_count`
+- Task Processing Fail Counter: `task_processing_fail_count`
+
+### Grafana
+
+Grafana is used to visualize the metrics collected by Prometheus.
+
+- Configuration Files:
+  - Data Source: [config/grafana/datasource.yml](config/grafana/datasource.yml)
+  - Dashboard:
+    - [config/grafana/dashboards.yml](config/grafana/dashboards.yml)
+    - [config/grafana/dashboards/task_processing_system.json](config/grafana/dashboards/task_processing_system.json)
+
+### How to Access Grafana
+
+- Open your browser and go to `http://localhost:3000`
+- Default credentials: `admin`/`admin`
+
+## Assumptions or Additional Design Decisions
+
+- **Database**: PostgreSQL is used as the database.
+- **Queue**: Redis is used as the queue system.
+- **Supervisor**: Supervisor is used to manage the Uvicorn process, as configured in config/supervisord.conf.
+- **Scalable**: The architecture allows adjustable worker counts for parallel processing, with the flexibility to deploy the server and consumer services separately in the future.

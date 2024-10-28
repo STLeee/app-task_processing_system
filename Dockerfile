@@ -7,6 +7,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 RUN apt-get update
 RUN apt-get install -y supervisor
+RUN apt-get install -y curl
 
 # copy project
 COPY ./app ./app
