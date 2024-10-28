@@ -12,6 +12,7 @@ RUN apt-get install -y supervisor
 COPY ./app ./app
 COPY ./config ./config
 RUN mv ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ./tests ./tests
 
 # expose port
 EXPOSE 8000

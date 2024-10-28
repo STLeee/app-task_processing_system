@@ -7,7 +7,9 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - .env.test
+    environment:
+      WORKERS: 1 # number of workers, start with 1 in first time due to the duplicate database initialization issue
     depends_on:
       db:
         condition: service_healthy

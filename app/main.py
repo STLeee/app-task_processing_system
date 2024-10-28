@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     # init db
     await init_db()
     # start task consumer
-    asyncio.create_task(start_consumer())
+    start_consumer()
     
     yield
     # close db

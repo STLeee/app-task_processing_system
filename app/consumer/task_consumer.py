@@ -33,7 +33,7 @@ async def process_task(task_id: str, db: AsyncSession):
         await db.rollback()
         logger.error(f"Task {task_id} processing error: {e}")
 
-async def start_consumer():
+async def run_consumer():
     while True:
         try:
             task_id = await dequeue_task()
@@ -45,3 +45,6 @@ async def start_consumer():
                     await process_task(task_id, db)
             else:
                 await asyncio.sleep(1)
+
+def start_consumer():
+    asyncio.create_task(run_consumer())

@@ -2,7 +2,6 @@ import pytest
 from unittest import mock
 import pytest_asyncio
 from app.consumer.task_consumer import process_task
-from app.db.models import Task
 
 @pytest_asyncio.fixture
 def mock_task():
