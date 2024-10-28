@@ -2,6 +2,8 @@
 
 - [Task Processing System](#task-processing-system)
   - [Project Architecture](#project-architecture)
+  - [Environment Variable Description](#environment-variable-description)
+    - [Common Environment Variables](#common-environment-variables)
   - [How to Run the Application Using Docker or Docker Compose](#how-to-run-the-application-using-docker-or-docker-compose)
   - [How to Execute Tests](#how-to-execute-tests)
   - [Assumptions or Additional Design Decisions](#assumptions-or-additional-design-decisions)
@@ -33,6 +35,44 @@ The Task Processing System is structured as follows:
 - **.env.dev**: Environment variables for development.
 - **.env.test**: Environment variables for testing.
 - **makefile**: Makefile for common tasks.
+
+## Environment Variable Description
+
+The Task Processing System uses several environment variables to manage its configuration. These variables are defined in `.env.dev` for development and `.env.test` for testing.
+
+### Common Environment Variables
+
+- **APP_ENV**
+  - **Description**: Specifies the environment in which the application is running.
+  - **Default**: `dev`
+  - **Example**: `APP_ENV=dev`
+
+- **LOG_LEVEL**
+  - **Description**: Sets the logging level for the application.
+  - **Default**: `debug`
+  - **Example**: `LOG_LEVEL=debug`
+
+- **LOG_FILE_PATH**
+  - **Description**: Specifies the path to the log file.
+  - **Default**: `logs/app.log`
+  - **Example**: `LOG_FILE_PATH=logs/app.log`
+
+- **DATABASE_URL**
+  - **Description**: URL for connecting to the database.
+  - **Default**: `postgresql+asyncpg://username:password@localhost:5432/db`
+  - **Example**: `DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/task_db`
+
+- **REDIS_HOST**
+  - **Description**: Hostname for the Redis server.
+  - **Default**: `localhost`
+  - **Example**: `REDIS_HOST=redis`
+
+- **TASK_CONSUMER_WORKERS**
+  - **Description**: Number of worker processes for the task consumer.
+  - **Default**: `1`
+  - **Example**: `TASK_CONSUMER_WORKERS=4`
+
+These environment variables are loaded and managed by the `Settings` class in [app/core/config.py](app/core/config.py).
 
 ## How to Run the Application Using Docker or Docker Compose
 
