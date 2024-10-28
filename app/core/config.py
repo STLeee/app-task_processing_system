@@ -11,11 +11,11 @@ class Settings(BaseSettings):
     database_url: str = Field(..., env="DATABASE_URL")
 
     # queue
-    redis_host: str = Field("localhost", env="REDIS_HOST")
+    redis_host: str = Field(..., env="REDIS_HOST")
 
     # auto load .env file
     class Config:
-        env_file = ".env"
+        env_file = f".env.{os.getenv('APP_ENV', 'dev')}"
         env_file_encoding = "utf-8"
 
 settings = Settings()
