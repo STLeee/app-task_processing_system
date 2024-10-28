@@ -9,7 +9,7 @@ services:
     env_file:
       - .env.test
     environment:
-      WORKERS: 1 # number of workers, start with 1 in first time due to the duplicate database initialization issue
+      SERVER_WORKERS: 1 # number of workers, start with 1 in first time due to the duplicate database initialization issue
     depends_on:
       db:
         condition: service_healthy

@@ -4,6 +4,7 @@ from app.db.models import Task
 from app.db.models import async_session
 from app.queue.redis_queue import dequeue_task
 from app.utils.logging import setup_logger
+from app.core.config import settings
 
 logger = setup_logger(__name__)
 
@@ -47,4 +48,5 @@ async def run_consumer():
                 await asyncio.sleep(1)
 
 def start_consumer():
-    asyncio.create_task(run_consumer())
+    for _ in range(settings.task_consumer_workers):
+        asyncio.create_task(run_consumer())

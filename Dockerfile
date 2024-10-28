@@ -18,7 +18,7 @@ COPY ./tests ./tests
 EXPOSE 8000
 
 # set environment variables
-ENV WORKERS=1
+ENV SERVER_WORKERS=1
 
 # start server
 CMD ["supervisord", "-n"]

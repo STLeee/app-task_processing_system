@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     # queue
     redis_host: str = Field("localhost", env="REDIS_HOST")
 
+    # task consumer
+    task_consumer_workers: int = Field(1, env="TASK_CONSUMER_WORKERS")
+
     def __init__(self, _env_file: str = None):
         if _env_file:
             self.Config.env_file = _env_file
