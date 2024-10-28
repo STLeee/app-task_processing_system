@@ -16,7 +16,7 @@ async def get_db():
 
 @router.post("/task", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 async def create_task(task: TaskCreate, db: AsyncSession = Depends(get_db)):
-    new_task = Task(task.content, db)
+    new_task = Task(task.content)
 
     # save task to the database
     try:
