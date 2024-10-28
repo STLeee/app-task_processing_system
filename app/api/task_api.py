@@ -16,10 +16,28 @@ async def get_db():
 
 @router.post("/task", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 async def create_task(task: TaskCreate, db: AsyncSession = Depends(get_db)):
-    new_task = await Task.create(task.content, db)
+    new_task = Task(task.content, db)
+
+    # save task to the database
+    try:
+        db.add(new_task)
+        await db.commit()
+        await db.refresh(new_task)
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Task creation error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Task creation error")
 
     # add task to the queue
-    await enqueue_task(new_task.id)
+    try:
+        await enqueue_task(new_task.id)
+    except Exception as e:
+        # rollback task creation if enqueue fails
+        db.delete(new_task)
+        await db.commit()
+
+        logger.error(f"Task creation error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Task creation error")
 
     logger.info(f"Task created with ID: {new_task.id}")
     return new_task

@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from app.core.config import settings
+from app.schemas import TASK_STATUS_PENDING
 
 # async engine and session
 engine = create_async_engine(settings.database_url, echo=True)
@@ -21,21 +22,17 @@ class Task(Base):
 
     id = Column(String, primary_key=True, index=True)
     content = Column(String, nullable=False)
-    status = Column(String, nullable=False, default="pending")
+    status = Column(String, nullable=False, default=TASK_STATUS_PENDING)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    def __init__(self, content: str, status: str=TASK_STATUS_PENDING):
+        self.id = str(uuid.uuid4())
+        self.content = content
+        self.status = status
 
     def __repr__(self):
         return f"<Task {self.id}>"
-
-    @classmethod
-    async def create(cls, content: str, db: AsyncSession) -> "Task":
-        task_id = str(uuid.uuid4())
-        task = Task(id=task_id, content=content, status="pending")
-        db.add(task)
-        await db.commit()
-        await db.refresh(task)
-        return task
     
     @classmethod
     async def get(cls, task_id: str, db: AsyncSession) -> "Task":
