@@ -68,6 +68,7 @@ This command will use Docker Compose to spin up the necessary services and execu
 - **Logging**: Logging is configured using config/uvicorn.log.conf.yml to output logs to stdout and stderr.
 - **Supervisor**: Supervisor is used to manage the Uvicorn process, as configured in config/supervisord.conf.
 - **Health Checks**: Health checks are configured for the app, db, and redis services in docker-compose.yml.
+- **Scalable**: The architecture allows adjustable worker counts for parallel processing, with the flexibility to deploy the server and consumer services separately in the future.
 
 ## API Description
 
