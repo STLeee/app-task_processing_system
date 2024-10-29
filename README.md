@@ -20,6 +20,7 @@
     - [Grafana](#grafana)
     - [How to Access Grafana](#how-to-access-grafana)
   - [Assumptions or Additional Design Decisions](#assumptions-or-additional-design-decisions)
+  - [Potential Improvements](#potential-improvements)
 
 ## Project Architecture
 
@@ -262,3 +263,15 @@ Grafana is used to visualize the metrics collected by Prometheus.
 - **Queue**: Redis is used as the queue system.
 - **Supervisor**: Supervisor is used to manage the Uvicorn process, as configured in config/supervisord.conf.
 - **Scalable**: The architecture allows adjustable worker counts for parallel processing, with the flexibility to deploy the server and consumer services separately in the future.
+
+## Potential Improvements
+
+- **Performance**
+  - [ ] **Optimize Database Queries**: Use batch inserts/updates and efficient indexing for frequently accessed fields to reduce database load and speed up task processing.
+  - [ ] **Implement Caching**: Cache frequently accessed task data or metadata in Redis to reduce database calls and improve response times.
+  - [ ] **Connection Pooling**: Enable connection pooling for both Redis and the database to reduce the overhead of opening and closing connections.
+  - [ ] **Batch Processing of Tasks**: Enable the consumer to process tasks in batches where appropriate, reducing the total number of I/O operations.
+- **Development and Monitoring**
+  - [] **Centralized Log Collection**: Centralized log aggregation and query capabilities (e.g. Loki), allowing efficient, structured log storage and real-time querying alongside Grafana metrics for enhanced monitoring and troubleshooting.
+  - [] **Load and Stress Testing**: Conduct load tests to evaluate system behavior under heavy workloads, allowing for performance tuning before production deployment.
+  - [] **Fault Injection**: Simulate network and service failures to verify system resilience and ensure the system handles Redis or database connection drops gracefully.
