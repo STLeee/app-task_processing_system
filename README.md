@@ -82,7 +82,7 @@ The Task Processing System uses several environment variables to manage its conf
   - **Default**: `1`
   - **Example**: `TASK_CONSUMER_WORKERS=4`
 
-These environment variables are loaded and managed by the `Settings` class in [app/core/config.py](app/core/config.py).
+These environment variables are loaded and managed by the `Settings` class in [`app/core/config.py`](app/core/config.py).
 
 ## How to Run the Application Using Docker or Docker Compose
 
@@ -112,7 +112,7 @@ This command will use Docker Compose to spin up the necessary services and execu
 
 ## API Description
 
-The Task Processing System provides APIs for message handling using **FastAPI**. You can find the implementation of these APIs in the [app/api/task_api.py](app/api/task_api.py) file.
+The Task Processing System provides APIs for message handling using **FastAPI**. You can find the implementation of these APIs in the [`app/api/task_api.py`](app/api/task_api.py) file.
 
 ***Interactive API documentation***: [`http://localhost:8000/docs`](http://localhost:8000/docs)
 
@@ -221,7 +221,7 @@ The Task Processing System includes a metrics system using Prometheus and Grafan
 
 Prometheus is configured to scrape metrics from the application.
 
-- Configuration File: [config/prometheus.yml](config/prometheus.yml)
+- Configuration File: [`config/prometheus.yml`](config/prometheus.yml)
 - Scrape Interval: 15 seconds
 - Scrape Target: `app:8000`
 
@@ -249,10 +249,10 @@ Prometheus is configured to scrape metrics from the application.
 Grafana is used to visualize the metrics collected by Prometheus.
 
 - Configuration Files:
-  - Data Source: [config/grafana/datasource.yml](config/grafana/datasource.yml)
+  - Data Source: [`config/grafana/datasource.yml`](config/grafana/datasource.yml)
   - Dashboard:
-    - [config/grafana/dashboards.yml](config/grafana/dashboards.yml)
-    - [config/grafana/dashboards/task_processing_system.json](config/grafana/dashboards/task_processing_system.json)
+    - [`config/grafana/dashboards.yml`](config/grafana/dashboards.yml)
+    - [`config/grafana/dashboards/task_processing_system.json`](config/grafana/dashboards/task_processing_system.json)
 
 ### How to Access Grafana
 
@@ -274,6 +274,6 @@ Grafana is used to visualize the metrics collected by Prometheus.
   - [ ] **Connection Pooling**: Enable connection pooling for both Redis and the database to reduce the overhead of opening and closing connections.
   - [ ] **Batch Processing of Tasks**: Enable the consumer to process tasks in batches where appropriate, reducing the total number of I/O operations.
 - **Development and Monitoring**
-  - [] **Centralized Log Collection**: Centralized log aggregation and query capabilities (e.g. Loki), allowing efficient, structured log storage and real-time querying alongside Grafana metrics for enhanced monitoring and troubleshooting.
-  - [] **Load and Stress Testing**: Conduct load tests to evaluate system behavior under heavy workloads, allowing for performance tuning before production deployment.
-  - [] **Fault Injection**: Simulate network and service failures to verify system resilience and ensure the system handles Redis or database connection drops gracefully.
+  - [ ] **Centralized Log Collection**: Centralized log aggregation and query capabilities (e.g. Loki), allowing efficient, structured log storage and real-time querying alongside Grafana metrics for enhanced monitoring and troubleshooting.
+  - [ ] **Load and Stress Testing**: Conduct load tests to evaluate system behavior under heavy workloads, allowing for performance tuning before production deployment.
+  - [ ] **Fault Injection**: Simulate network and service failures to verify system resilience and ensure the system handles Redis or database connection drops gracefully.
