@@ -243,6 +243,13 @@ Prometheus is configured to scrape metrics from the application.
 - Task Processing Duration Histogram: `task_processing_duration`
 - Task Processing Success Counter: `task_processing_success_count`
 - Task Processing Fail Counter: `task_processing_fail_count`
+- Queue Length Counter: `queue_length`
+- Queue Push Counter: `queue_push_count`
+- Queue Push Fail Counter: `queue_push_fail_count`
+- Queue Pop Counter: `queue_pop_count`
+- Queue Pop Fail Counter: `queue_pop_fail_count`
+
+You can find the implementation of metrics in the [`app/utils/metrics.py`](app/utils/metrics.py) file.
 
 ### Grafana
 
