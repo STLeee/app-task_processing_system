@@ -1,6 +1,7 @@
 # Task Processing System
 
 - [Task Processing System](#task-processing-system)
+  - [Requirements](#requirements)
   - [Project Architecture](#project-architecture)
   - [Environment Variable Description](#environment-variable-description)
     - [Common Environment Variables](#common-environment-variables)
@@ -21,6 +22,10 @@
     - [How to Access Grafana](#how-to-access-grafana)
   - [Assumptions or Additional Design Decisions](#assumptions-or-additional-design-decisions)
   - [Potential Improvements](#potential-improvements)
+
+## Requirements
+
+The requirements for this system are derived from an exam document, located at [`doc/EXAM.md`](doc/EXAM.md). Please refer to this file for the full details on system specifications and requirements.
 
 ## Project Architecture
 
@@ -115,6 +120,8 @@ This command will use Docker Compose to spin up the necessary services and execu
 The Task Processing System provides APIs for message handling using **FastAPI**. You can find the implementation of these APIs in the [`app/api/task_api.py`](app/api/task_api.py) file.
 
 ***Interactive API documentation***: [`http://localhost:8000/docs`](http://localhost:8000/docs)
+
+![](doc/api_doc.png)
 
 ### Create Task API
 
@@ -265,6 +272,8 @@ Grafana is used to visualize the metrics collected by Prometheus.
 
 - Open your browser and go to [`http://localhost:3000`](http://localhost:3000)
 - Default credentials: `admin`/`admin`
+
+![](doc/dashboard.png)
 
 ## Assumptions or Additional Design Decisions
 
