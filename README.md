@@ -114,73 +114,75 @@ This command will use Docker Compose to spin up the necessary services and execu
 
 The Task Processing System provides APIs for message handling using **FastAPI**. You can find the implementation of these APIs in the [app/api/task_api.py](app/api/task_api.py) file.
 
+***Interactive API documentation***: [`http://localhost:8000/docs`](http://localhost:8000/docs)
+
 ### Create Task API
 
-    - **Endpoint**: `/task`
-    - **Method**: `POST`
-    - **Description**: Receives a message payload and enqueues it into a message queue (e.g., Redis, RabbitMQ, Kafka). It also creates a new `task` in the database and sets the `status` of the `task` to `pending`.
-    - **Request Body**:
-        ```json
-        {
-            "content": "string"
-        }
-        ```
-    - **Response**:
-        ```json
-        {
-            "id": "string",
-            "content": "string",
-            "status": "pending",
-            "created_at": "2024-10-28T08:04:08.990161Z",
-            "updated_at": null
-        }
-        ```
-    - **Status Codes**:
-        - `201 Created`: Task successfully created and enqueued.
-        - `500 Internal Server Error`: Error occurred during task creation or enqueuing.
+- **Endpoint**: `/task`
+- **Method**: `POST`
+- **Description**: Receives a message payload and enqueues it into a message queue (e.g., Redis, RabbitMQ, Kafka). It also creates a new `task` in the database and sets the `status` of the `task` to `pending`.
+- **Request Body**:
+  ```json
+  {
+      "content": "string"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+      "id": "string",
+      "content": "string",
+      "status": "pending",
+      "created_at": "2024-10-28T08:04:08.990161Z",
+      "updated_at": null
+  }
+  ```
+- **Status Codes**:
+  - `201 Created`: Task successfully created and enqueued.
+  - `500 Internal Server Error`: Error occurred during task creation or enqueuing.
 
 ### Get Task API
 
-    - **Endpoint**: `/task/{task_id}`
-    - **Method**: `GET`
-    - **Description**: Get Task date.
-    - **Path Parameters**:
-        - `task_id`: The ID of the task.
-    - **Response**:
-        ```json
-        {
-            "id": "string",
-            "content": "string",
-            "status": "pending",
-            "created_at": "2024-10-28T08:04:08.990161Z",
-            "updated_at": null
-        }
-        ```
-    - **Status Codes**:
-        - `200 OK`: Task successfully found in database.
-        - `404 Not Found`: Task not found.
+- **Endpoint**: `/task/{task_id}`
+- **Method**: `GET`
+- **Description**: Get Task date.
+- **Path Parameters**:
+  - `task_id`: The ID of the task.
+- **Response**:
+  ```json
+  {
+      "id": "string",
+      "content": "string",
+      "status": "pending",
+      "created_at": "2024-10-28T08:04:08.990161Z",
+      "updated_at": null
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Task successfully found in database.
+  - `404 Not Found`: Task not found.
 
 ### Cancel Task API
 
-    - **Endpoint**: `/task/{task_id}/cancel`
-    - **Method**: `PATCH`
-    - **Description**: Cancels a task if its status is still `pending` or `processing`. Once the task has been marked as `completed`, cancellation is not allowed.
-    - **Path Parameters**:
-        - `task_id`: The ID of the task to be canceled.
-    - **Response**:
-        ```json
-        {
-            "id": "string",
-            "content": "string",
-            "status": "canceled",
-            "created_at": "2024-10-28T08:04:08.990161Z",
-            "updated_at": "2024-10-28T08:04:12.067154Z"
-        }
-        ```
-    - **Status Codes**:
-        - `200 OK`: Task successfully canceled.
-        - `404 Not Found`: Task not found.
-        - `400 Bad Request`: Task cannot be canceled because it is already completed.
+- **Endpoint**: `/task/{task_id}/cancel`
+- **Method**: `PATCH`
+- **Description**: Cancels a task if its status is still `pending` or `processing`. Once the task has been marked as `completed`, cancellation is not allowed.
+- **Path Parameters**:
+  - `task_id`: The ID of the task to be canceled.
+- **Response**:
+  ```json
+  {
+      "id": "string",
+      "content": "string",
+      "status": "canceled",
+      "created_at": "2024-10-28T08:04:08.990161Z",
+      "updated_at": "2024-10-28T08:04:12.067154Z"
+  }
+  ```
+- **Status Codes**:
+  - `200 OK`: Task successfully canceled.
+  - `404 Not Found`: Task not found.
+  - `400 Bad Request`: Task cannot be canceled because it is already completed.
 
 ### Health Check API
 
@@ -188,13 +190,13 @@ The Task Processing System provides APIs for message handling using **FastAPI**.
 - **Method**: `GET`
 - **Description**: Checks the health status of the application.
 - **Response**:
-    ```json
-    {
-        "status": "ok"
-    }
-    ```
+  ```json
+  {
+      "status": "ok"
+  }
+  ```
 - **Status Codes**:
-    - `200 OK`: Application is healthy.
+  - `200 OK`: Application is healthy.
 
 ## Consumer for Processing Messages
 
@@ -225,7 +227,7 @@ Prometheus is configured to scrape metrics from the application.
 
 #### How to Access Prometheus
 
-- Open your browser and go to `http://localhost:9090`
+- Open your browser and go to [`http://localhost:9090`](http://localhost:9090)
 
 ### Example Metrics
 
@@ -254,7 +256,7 @@ Grafana is used to visualize the metrics collected by Prometheus.
 
 ### How to Access Grafana
 
-- Open your browser and go to `http://localhost:3000`
+- Open your browser and go to [`http://localhost:3000`](http://localhost:3000)
 - Default credentials: `admin`/`admin`
 
 ## Assumptions or Additional Design Decisions
